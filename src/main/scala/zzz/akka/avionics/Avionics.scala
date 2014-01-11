@@ -12,7 +12,8 @@ object Avionics {
 	implicit val timeout = Timeout(5.seconds)
 
 	val system = ActorSystem("Avionics")
-	val plane = system.actorOf(Props(new Plane with AltimeterProvider with PilotProvider with LeadFlightAttendantProvider), "Plane")
+	val plane = system.actorOf(Props(new Plane with AltimeterProvider 
+	    with PilotProvider with LeadFlightAttendantProvider with HeadingIndicatorProvider), "Plane")
 
 	def main(args: Array[String]) {
 	    import Plane._

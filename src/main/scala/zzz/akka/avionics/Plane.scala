@@ -20,10 +20,12 @@ object Plane {
 
 class Plane extends Actor with ActorLogging {
 
-  this: AltimeterProvider with PilotProvider with LeadFlightAttendantProvider =>
+  this: AltimeterProvider with PilotProvider 
+  with LeadFlightAttendantProvider with HeadingIndicatorProvider =>
 
   import Altimeter._
   import Plane._
+  import ControlSurfaces._
 
   val cfgstr = "zzz.akka.avionics.flightcrew"
   val config = context.system.settings.config
@@ -52,8 +54,9 @@ class Plane extends Actor with ActorLogging {
     val controls = context.actorOf(Props(new IsolatedResumeSupervisor with OneForOneStrategyFactory {
       def childStarter() {
         val alt = context.actorOf(Props(newAltiemeter), "Altimeter")
+        val heading = context.actorOf(Props(newHeadingIndicator), "HeadingIndicator")
         context.actorOf(Props(newAutopilot), "Autopilot")
-        context.actorOf(Props(new ControlSurfaces(alt)), "ControlSurfaces")
+        context.actorOf(Props(new ControlSurfaces(self, alt, heading)), "ControlSurfaces")
       }
     }), "Equipment")
     import IsolatedLifeCycleSupervisor._
@@ -79,6 +82,7 @@ class Plane extends Actor with ActorLogging {
   def receive = {
     case GiveMeControl =>
       log info ("Plane giving control.")
+      actorForControls("ControlSurfaces") ! HasControl(sender)
       sender ! Controls(actorForControls("ControlSurfaces"))
     case AltitudeUpdate(altitude) =>
       log info (s"Altitude is now : $altitude")

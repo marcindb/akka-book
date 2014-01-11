@@ -28,6 +28,7 @@ class Pilot(plane: ActorRef, autopilot: ActorRef, var controls: ActorRef, altime
   def receive = {
     case ReadyToGo =>
       copilot = context.actorFor("../" + copilotName)
+      plane ! GiveMeControl
     case Controls(controlSurfaces) => controls = controlSurfaces
   }
 
