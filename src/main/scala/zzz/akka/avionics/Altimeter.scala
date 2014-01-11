@@ -11,6 +11,12 @@ object Altimeter {
 	def apply() = new Altimeter with ProductionEventSource
 }
 
+trait AltimeterProvider {
+  
+  def newAltiemeter = new Altimeter with ProductionEventSource
+    
+}
+
 class Altimeter extends Actor with ActorLogging {
   this: EventSource =>
     

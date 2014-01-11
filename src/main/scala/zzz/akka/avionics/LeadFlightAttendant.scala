@@ -4,6 +4,7 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import akka.actor.Props
 
+
 trait AttendantCreationPolicy {
   val numberOfAttendants: Int = 8
   def createAttendant = FlightAttendant()
