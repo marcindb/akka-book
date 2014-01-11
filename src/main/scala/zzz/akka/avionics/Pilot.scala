@@ -2,6 +2,7 @@ package zzz.akka.avionics
 
 import akka.actor.Actor
 import akka.actor.ActorRef
+import akka.actor.Terminated
 
 object Pilot {
   case object ReadyToGo
@@ -35,11 +36,19 @@ class Pilot(plane: ActorRef, autopilot: ActorRef, var controls: ActorRef, altime
 class Copilot(plane: ActorRef, autopilot: ActorRef, altimeter: ActorRef) extends Actor {
 
   import Pilot._
+  import Plane._
 
   var controls: ActorRef = context.system.deadLetters
+  var pilot: ActorRef = context.system.deadLetters  
   var pilotName = context.system.settings.config.getString("zzz.akka.avionics.flightcrew.pilotName")
+  
   def receive = {
     case ReadyToGo => 
+      pilot = context.actorFor("../" + pilotName)
+      context.watch(pilot)
+    case Terminated(_) =>
+      plane ! GiveMeControl
+    case Controls(controlSurfaces) => controls = controlSurfaces
   }
 
 }
